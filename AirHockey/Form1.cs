@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Media;
 
 namespace AirHockey
 {
@@ -16,14 +17,17 @@ namespace AirHockey
         // declaring the size and postition of each drawing
         Rectangle player1 = new Rectangle(180, 32, 40, 40);
         Rectangle player2 = new Rectangle(180, 532, 39, 39);
+
         Rectangle player1LeftSide = new Rectangle(178, 30, 5, 40);
         Rectangle player1RightSide = new Rectangle(218, 30, 5, 45);
         Rectangle player1Bottom = new Rectangle(178, 70, 40, 5);
         Rectangle player1Top = new Rectangle(178, 30, 40, 5);
+
         Rectangle player2LeftSide = new Rectangle(178, 530, 5, 40);
         Rectangle player2RightSide = new Rectangle(216, 530, 5, 43);
         Rectangle player2Top = new Rectangle(178, 530, 40, 5);
         Rectangle player2Bottom = new Rectangle(178, 568, 42, 5);
+
         Rectangle ball = new Rectangle(195, 295, 10, 10);
         Rectangle player1Goal = new Rectangle(150, 18, 100, 8);
         Rectangle player2Goal = new Rectangle(150, 574, 100, 8);
@@ -33,25 +37,34 @@ namespace AirHockey
         int player2Score = 0;
 
         int playerSpeed = 4;
-        int ballXSpeed = 8;
-        int ballYSpeed = 6;
+        int ballXSpeed = 0;
+        int ballYSpeed = 0;
         int baller = 0;
 
         bool wDown = false;
         bool sDown = false;
         bool aDown = false;
         bool dDown = false;
+
         bool upArrowDown = false;
         bool downArrowDown = false;
         bool leftArrowDown = false;
         bool rightArrowDown = false;
 
+        // creating brushes and pens to draw with
         SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
         SolidBrush orangeBrush = new SolidBrush(Color.Orange);
         SolidBrush blackBrush = new SolidBrush(Color.Black);
-        SolidBrush redBrush = new SolidBrush (Color.Red);
+        SolidBrush redBrush = new SolidBrush(Color.Red);
         SolidBrush lightBlueBrush = new SolidBrush(Color.Blue);
+
         Pen blackPen = new Pen(Color.Black, 4);
+
+        // creating soundplayers
+        /* SoundPlayer puckPlayerHit = new SoundPlayer(Properties.Resources.puckPlayerHit);
+        // SoundPlayer goalScored = new SoundPlayer(Properties.Resources.goalScores);
+        // SoundPlayer puckWallHit = new SoundPlayer(Properties.Resources.puckWallHit)
+         Soundplayer playerWallHit = new Soundplayer(Properties.Resources.playerWallHit) */
         public Form1()
         {
             InitializeComponent();
@@ -123,18 +136,24 @@ namespace AirHockey
             e.Graphics.DrawEllipse(blackPen, 150, 250, 100, 100);
             e.Graphics.FillRectangle(redBrush, 42, 175, 320, 4);
             e.Graphics.FillRectangle(blueBrush, 42, 425, 320, 4);
+
             e.Graphics.FillRectangle(redBrush, ball);
+
             e.Graphics.FillRectangle(blueBrush, player1LeftSide);
             e.Graphics.FillRectangle(blueBrush, player1RightSide);
             e.Graphics.FillRectangle(blueBrush, player1Top);
             e.Graphics.FillRectangle(blueBrush, player1Bottom);
+
             e.Graphics.FillRectangle(redBrush, player2LeftSide);
             e.Graphics.FillRectangle(redBrush, player2RightSide);
             e.Graphics.FillRectangle(redBrush, player2Top);
             e.Graphics.FillRectangle(redBrush, player2Bottom);
+
             e.Graphics.FillRectangle(blackBrush, player2);
             e.Graphics.FillRectangle(blackBrush, player1);
+
             e.Graphics.DrawRectangle(blackPen, 40, 20, 320, 560);
+
             e.Graphics.FillRectangle(blueBrush, player1Goal);
             e.Graphics.FillRectangle(redBrush, player2Goal);
         }
@@ -240,8 +259,8 @@ namespace AirHockey
                 ball.X -= 4;
                 ballXSpeed *= -1;
             }
-            // checking if the ball has intersected with a player
-            if (player1LeftSide.IntersectsWith(ball))
+            // checking if the ball has intersected with player 1
+            if (player1LeftSide.IntersectsWith(ball) && player1LeftSide.X <= 312)
             {
                 ballYSpeed /= 2;
                 ballXSpeed = 8;
@@ -254,7 +273,15 @@ namespace AirHockey
                 player1RightSide.X += 3;
                 ballXSpeed *= -1;
             }
-            else if (player1RightSide.IntersectsWith(ball))
+            else if (player1LeftSide.IntersectsWith(ball) && player1LeftSide.X > 312)
+            {
+                ballYSpeed /= 2;
+                ballXSpeed = 8;
+                baller++;
+                ball.X -= 5;
+                ballXSpeed *= -1;
+            }
+            if (player1RightSide.IntersectsWith(ball) && player1RightSide.X >= 82)
             {
                 ballYSpeed /= 2;
                 ballXSpeed = -8;
@@ -267,7 +294,15 @@ namespace AirHockey
                 player1RightSide.X -= 3;
                 ballXSpeed *= -1;
             }
-            else if (player1Top.IntersectsWith(ball))
+            else if (player1RightSide.IntersectsWith(ball) && player1RightSide.X < 82)
+            {
+                ballYSpeed /= 2;
+                ballXSpeed = -8;
+                baller++;
+                ball.X += 5;
+                ballXSpeed *= -1;
+            }
+            if (player1Top.IntersectsWith(ball) && player1Top.Y <= 534)
             {
                 ballXSpeed /= 2;
                 ballYSpeed = 6;
@@ -280,7 +315,15 @@ namespace AirHockey
                 player1RightSide.Y += 3;
                 ballYSpeed *= -1;
             }
-            else if (player1Bottom.IntersectsWith(ball))
+            else if (player1Top.IntersectsWith(ball) && player1Top.Y > 534)
+            {
+                ballXSpeed /= 2;
+                ballYSpeed = 6;
+                baller++;
+                ball.Y -= 5;
+                ballYSpeed *= -1;
+            }
+            if (player1Bottom.IntersectsWith(ball) && player1Bottom.Y >= 58)
             {
                 ballXSpeed /= 2;
                 ballYSpeed = -6;
@@ -293,11 +336,22 @@ namespace AirHockey
                 player1RightSide.Y -= 3;
                 ballYSpeed *= -1;
             }
-            else if (player2LeftSide.IntersectsWith(ball))
+            else if (player1Bottom.IntersectsWith(ball) && player1Bottom.Y < 58)
+            {
+                ballXSpeed /= 2;
+                ballYSpeed = -6;
+                baller++;
+                ball.Y += 5;
+                ballYSpeed *= -1;
+            }
+
+            // checking if the ball has colided with player 2
+            if (player2LeftSide.IntersectsWith(ball) && player2LeftSide.X <= 312)
             {
                 ballYSpeed /= 2;
                 ballXSpeed = 8;
                 baller++;
+                ball.X -= 5;
                 player2.X += 3;
                 player2Bottom.X += 3;
                 player2Top.X += 3;
@@ -305,11 +359,20 @@ namespace AirHockey
                 player2RightSide.X += 3;
                 ballXSpeed *= -1;
             }
-            else if (player2RightSide.IntersectsWith(ball))
+            else if (player2LeftSide.IntersectsWith(ball) && player2LeftSide.X > 312)
+            {
+                ballYSpeed /= 2;
+                ballXSpeed = 8;
+                baller++;
+                ball.X -= 5;
+                ballXSpeed *= -1;
+            }
+            if (player2RightSide.IntersectsWith(ball) && player2RightSide.X >= 82)
             {
                 ballYSpeed /= 2;
                 ballXSpeed = -8;
                 baller++;
+                ball.X += 5;
                 player2.X -= 3;
                 player2Bottom.X -= 3;
                 player2Top.X -= 3;
@@ -317,11 +380,20 @@ namespace AirHockey
                 player2RightSide.X -= 3;
                 ballXSpeed *= -1;
             }
-            else if (player2Top.IntersectsWith(ball))
+            else if (player2RightSide.IntersectsWith(ball) && player2RightSide.X < 82)
+            {
+                ballYSpeed /= 2;
+                ballXSpeed = -8;
+                baller++;
+                ball.X += 5;
+                ballXSpeed *= -1;
+            }
+            if (player2Top.IntersectsWith(ball) && player2Top.Y <= 534)
             {
                 ballXSpeed /= 2;
-                ballYSpeed = -6;
+                ballYSpeed = 6;
                 baller++;
+                ball.Y -= 5;
                 player2.Y += 3;
                 player2Bottom.Y += 3;
                 player2Top.Y += 3;
@@ -329,16 +401,33 @@ namespace AirHockey
                 player2RightSide.Y += 3;
                 ballYSpeed *= -1;
             }
-            else if (player2Bottom.IntersectsWith(ball))
+            else if (player2Top.IntersectsWith(ball) && player2Top.Y > 534)
             {
                 ballXSpeed /= 2;
                 ballYSpeed = 6;
                 baller++;
+                ball.Y -= 5;
+                ballYSpeed *= -1;
+            }
+            if (player2Bottom.IntersectsWith(ball) && player2Bottom.Y >= 58)
+            {
+                ballXSpeed /= 2;
+                ballYSpeed = -6;
+                baller++;
+                ball.Y += 5;
                 player2.Y -= 3;
                 player2Bottom.Y -= 3;
                 player2Top.Y -= 3;
                 player2LeftSide.Y -= 3;
                 player2RightSide.Y -= 3;
+                ballYSpeed *= -1;
+            }
+            else if (player2Bottom.IntersectsWith(ball) && player2Bottom.Y < 58)
+            {
+                ballXSpeed /= 2;
+                ballYSpeed = -6;
+                baller++;
+                ball.Y += 5;
                 ballYSpeed *= -1;
             }
 
@@ -352,29 +441,7 @@ namespace AirHockey
 
                 p2scoreLabel.Text = $"{player2Score}";
 
-                player1.X = 180;
-                player1.Y = 32;
-                player1LeftSide.X = 178;
-                player1LeftSide.Y = 30;
-                player1RightSide.X = 218;
-                player1RightSide.Y = 30;
-                player1Bottom.X = 178;
-                player1Bottom.Y = 70;
-                player1Top.X = 178;
-                player1Top.Y = 30;
-
-                player2.X = 180;
-                player2.Y = 532;
-                player2LeftSide.X = 178;
-                player2LeftSide.Y = 530;
-                player2RightSide.X = 216;
-                player2RightSide.Y = 530;
-                player2Bottom.X = 178;
-                player2Bottom.Y = 568;
-                player2Top.X = 178;
-                player2Top.Y = 530;
-
-                baller = 0;
+                playerReset();
             }
             else if (player2Goal.IntersectsWith(ball))
             {
@@ -385,29 +452,7 @@ namespace AirHockey
 
                 p1scoreLabel.Text = $"{player1Score}";
 
-                player1.X = 180;
-                player1.Y = 32;
-                player1LeftSide.X = 178;
-                player1LeftSide.Y = 30;
-                player1RightSide.X = 218;
-                player1RightSide.Y = 30;
-                player1Bottom.X = 178;
-                player1Bottom.Y = 70;
-                player1Top.X = 178;
-                player1Top.Y = 30;
-
-                player2.X = 180;
-                player2.Y = 532;
-                player2LeftSide.X = 178;
-                player2LeftSide.Y = 530;
-                player2RightSide.X = 216;
-                player2RightSide.Y = 530;
-                player2Bottom.X = 178;
-                player2Bottom.Y = 568;
-                player2Top.X = 178;
-                player2Top.Y = 530;
-
-                baller = 0;
+                playerReset();
             }
 
             // checking if a player has won
@@ -425,6 +470,35 @@ namespace AirHockey
             }
 
             Refresh();
+        }
+        public void playerReset()
+        {
+            player1.X = 180;
+            player1.Y = 32;
+            player1LeftSide.X = 178;
+            player1LeftSide.Y = 30;
+            player1RightSide.X = 218;
+            player1RightSide.Y = 30;
+            player1Bottom.X = 178;
+            player1Bottom.Y = 70;
+            player1Top.X = 178;
+            player1Top.Y = 30;
+
+            player2.X = 180;
+            player2.Y = 532;
+            player2LeftSide.X = 178;
+            player2LeftSide.Y = 530;
+            player2RightSide.X = 218;
+            player2RightSide.Y = 530;
+            player2Bottom.X = 178;
+            player2Bottom.Y = 568;
+            player2Top.X = 178;
+            player2Top.Y = 530;
+
+            baller = 0;
+
+            ballXSpeed = 0;
+            ballYSpeed = 0;
         }
     }
 }
